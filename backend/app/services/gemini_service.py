@@ -13,9 +13,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Modelo principal y modelos de respaldo (menos demandados, más estables)
 MODELOS = [
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
+    "gemini-3.8-flash"
 ]
 
 MAX_REINTENTOS = 3

@@ -32,8 +32,8 @@ function App() {
           <Route path="/cartelera" element={<Cartelera />} />
           <Route path="/cartelera/:id" element={<DetalleObra />} />
           <Route path="/programa" element={<Programa />} />
+          <Route path="/docente/*" element={<ActorModule><DocenteRoutes /></ActorModule>} />
           <Route element={<AppShell />}>
-            <Route path="/docente/*" element={<ActorModule><DocenteRoutes /></ActorModule>} />
             <Route path="/estudiante/*" element={<ActorModule><EstudianteRoutes /></ActorModule>} />
             <Route path="/director/*" element={<ActorModule><DirectorRoutes /></ActorModule>} />
             <Route path="/admin/*" element={<ActorModule><AdminRoutes /></ActorModule>} />
