@@ -11,9 +11,11 @@ logger = logging.getLogger(__name__)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Modelo principal y modelos de respaldo (menos demandados, más estables)
+# Modelo principal y modelos de respaldo estables
 MODELOS = [
-    "gemini-3.8-flash"
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-2.5-flash",
 ]
 
 MAX_REINTENTOS = 3
@@ -26,6 +28,7 @@ client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 GUIA_PRECARGADA = {
     "titulo": "El puente de las voces",
+    "competencia": "Aprecia de manera crítica manifestaciones artístico-culturales / Convive y participa democráticamente en la búsqueda del bien común",
     "objetivo": "Desarrollar la empatía y promover alternativas pacíficas "
                 "ante situaciones de conflicto escolar mediante la "
                 "representación teatral.",
@@ -189,8 +192,16 @@ def _llamar_gemini(instrucciones, temperature, max_tokens):
                 )
                 break  # No reintentar JSON inválido, probar otro modelo
 
+            except Exception as e:
+                ultimo_error = e
+                logger.warning(
+                    "Gemini %s falló con error: %s. Probando siguiente modelo...",
+                    modelo, e,
+                )
+                break
+
         logger.warning(
-            "Modelo %s agotó reintentos. Probando siguiente modelo...",
+            "Modelo %s agotó intentos. Probando siguiente modelo...",
             modelo,
         )
 
@@ -202,7 +213,8 @@ def generar_guia(tema, objetivo, edad, duracion):
     """Genera una guía teatral. Si Gemini falla, devuelve respuesta
     precargada para que la demo nunca se caiga."""
     if client is None:
-        raise RuntimeError("Gemini no está configurado en el servidor.")
+        logger.warning("Gemini no configurado o sin API key. Usando respuesta precargada.")
+        return GUIA_PRECARGADA
 
     instrucciones = f"""
     Eres un asistente de diseño pedagógico especializado en teatro
@@ -219,6 +231,7 @@ def generar_guia(tema, objetivo, edad, duracion):
 
     {{
         "titulo": "Título de la actividad",
+        "competencia": "Competencia CNEB asociada (ej. Convive y participa democráticamente en la búsqueda del bien común)",
         "objetivo": "Objetivo pedagógico",
         "materiales": ["Material 1", "Material 2"],
         "personajes": [
