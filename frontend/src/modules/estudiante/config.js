@@ -1,8 +1,13 @@
 export default {
-  id: 'estudiante', prefix: '/estudiante', label: 'Estudiante', initials: 'ES', demoName: 'Estudiante de prueba',
+  id: 'estudiante',
+  prefix: '/estudiante',
+  label: 'Estudiante',
+  initials: 'AC',
+  demoName: 'Andrea Castro · 3.° B',
   navigation: [
-    ['/estudiante', 'Mi espacio', 'home'],
-    ['/cartelera', 'Cartelera', 'ticket'],
-    ['/programa', 'Voces que Transforman', 'users'],
+    ['/estudiante', 'Mi ruta cultural', 'home'],
+    ['/estudiante/reflexiones', 'Mis reflexiones', 'book'],
+    ['/estudiante/cursos', 'Cursos y Talleres', 'spark'],
+    ['/estudiante/cartelera', 'Cartelera', 'ticket'],
   ],
 }

@@ -265,7 +265,8 @@ def analizar_reflexion(reflexion):
     """Analiza una reflexión. Si Gemini falla, devuelve análisis
     precargado para que la demo nunca se caiga."""
     if client is None:
-        raise RuntimeError("Gemini no está configurado en el servidor.")
+        logger.warning("Gemini no configurado o sin API key. Usando análisis precargado.")
+        return ANALISIS_PRECARGADO
 
     instrucciones = f"""
     Analiza esta reflexión escrita después de una actividad teatral
