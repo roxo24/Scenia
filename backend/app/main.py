@@ -9,16 +9,14 @@ load_dotenv()
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
 
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-
+# Permitir CORS para localhost, Vercel y cualquier dominio de frontend
 CORS(
     app,
     resources={
         r"/*": {
-            "origins": [
-                "http://localhost:5173",
-                frontend_url,
-            ]
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
         }
     },
 )
