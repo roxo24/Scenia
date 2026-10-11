@@ -110,66 +110,83 @@ function Docente() {
   }
 
   return (
-    <div className="container">
-      <PageHeading eyebrow="DOCENTE · IA PEDAGÓGICA" title="Generador de Guías Pedagógicas">
-        Diseña una propuesta antes, durante y después de la experiencia escénica.
-      </PageHeading>
+    <div className="dc-page-wrap">
+      {/* Cabecera inspirada en la imagen de referencia */}
+      <div className="dc-header-referencia">
+        <span className="dc-eyebrow-red">TU ASISTENTE PEDAGÓGICO</span>
+        <h1 className="dc-title-hero">Haz que tu próxima clase cobre vida.</h1>
+        <p className="dc-subtitle-hero">Prepara una propuesta teatral y revísala antes de llevarla al aula.</p>
+        <p className="dc-meta-caption">
+          Este formulario utiliza tu backend y Gemini. La respuesta es una propuesta editable para revisión docente.
+        </p>
+      </div>
 
-      <div className="card">
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="clase">Clase:</label>
-              <select id="clase" value={claseId} onChange={(e) => elegirClase(e.target.value)}>
-                <option value="">Sin clase (guía suelta)</option>
-                {clases.map((c) => (
-                  <option key={c.id} value={c.id}>{c.grade} {c.section} · {c.subject}</option>
-                ))}
-              </select>
+      {/* Card Principal del Formulario */}
+      <div className="dc-form-card">
+        <form onSubmit={handleSubmit} className="dc-form-inner">
+          {/* Selector opcional de clase y sesión */}
+          {(clases.length > 0 || SESIONES.length > 0) && (
+            <div className="dc-row-grid">
+              <div className="dc-field-group">
+                <label htmlFor="clase">Vincular a Clase (Opcional):</label>
+                <select id="clase" value={claseId} onChange={(e) => elegirClase(e.target.value)} className="dc-input-modern">
+                  <option value="">Sin clase (guía libre)</option>
+                  {clases.map((c) => (
+                    <option key={c.id} value={c.id}>{c.grade} {c.section} · {c.subject}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="dc-field-group">
+                <label htmlFor="sesion">Sesión del Programa:</label>
+                <select id="sesion" value={sesion} onChange={(e) => elegirSesion(e.target.value)} className="dc-input-modern">
+                  <option value="">Ninguna</option>
+                  {SESIONES.map((s) => (
+                    <option key={s.n} value={s.n}>{nombreSesion(s)}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="sesion">Sesión de Voces que Transforman:</label>
-              <select id="sesion" value={sesion} onChange={(e) => elegirSesion(e.target.value)}>
-                <option value="">Ninguna</option>
-                {SESIONES.map((s) => (
-                  <option key={s.n} value={s.n}>{nombreSesion(s)}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          )}
 
-          <div className="form-group">
-            <label htmlFor="tema">Tema o Concepto:</label>
+          {/* Campo Tema */}
+          <div className="dc-field-group">
+            <label htmlFor="tema">Tema</label>
             <input
               type="text"
               id="tema"
               name="tema"
+              className="dc-input-modern dc-input-large"
               value={form.tema}
               onChange={handleChange}
-              placeholder="Ej: La empatía en situaciones de conflicto"
+              placeholder="Ej: Bullying, Empatía en el aula, Comunicación no violenta"
               required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="objetivo">Objetivo Pedagógico:</label>
+          {/* Campo Objetivo */}
+          <div className="dc-field-group">
+            <label htmlFor="objetivo">Objetivo pedagógico</label>
             <textarea
               id="objetivo"
               name="objetivo"
+              className="dc-textarea-modern"
+              rows={4}
               value={form.objetivo}
               onChange={handleChange}
-              placeholder="¿Qué deseas que los estudiantes reflexionen o aprendan?"
+              placeholder="Ej: Promover la empatía y prevenir el acoso escolar mediante la dramatización de roles"
               required
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="edad">Edad Sugerida:</label>
+          {/* Fila Edad y Duración */}
+          <div className="dc-row-grid">
+            <div className="dc-field-group">
+              <label htmlFor="edad">Edad (años)</label>
               <input
                 type="number"
                 id="edad"
                 name="edad"
+                className="dc-input-modern"
                 value={form.edad}
                 onChange={handleChange}
                 min={6}
@@ -178,29 +195,34 @@ function Docente() {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="duracion">Duración (minutos):</label>
+            <div className="dc-field-group">
+              <label htmlFor="duracion">Duración (minutos)</label>
               <input
                 type="number"
                 id="duracion"
                 name="duracion"
+                className="dc-input-modern"
                 value={form.duracion}
                 onChange={handleChange}
-                min={15}
+                min={10}
                 max={120}
                 required
               />
             </div>
           </div>
 
-          <button type="submit" disabled={cargando}>
-            {cargando ? 'Generando con IA...' : 'Generar Guía'}
-          </button>
+          {/* Botón de Acción Principal */}
+          <div className="dc-button-wrapper">
+            <button type="submit" disabled={cargando} className="dc-btn-generate">
+              {cargando ? 'Generando guía...' : 'Generar guía'}
+            </button>
+          </div>
         </form>
 
         {cargando && <Loading mensaje="Generando tu guía pedagógica con IA..." />}
         {error && <ErrorMessage mensaje={error} />}
         {aviso && <div className="dc-ok" role="status">{aviso}</div>}
+      </div>
 
         {guia && (
           <div className="dc-guia-container">

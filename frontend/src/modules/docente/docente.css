@@ -39,6 +39,169 @@
 .actor-docente .dc-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #e4e4e7; flex-wrap: wrap; }
 .actor-docente .dc-print-only { display: none; }
 
+/* ===== ESTILO HERO & FORMULARIO (BASADO EN REFERENCIA) ===== */
+.dc-page-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.dc-header-referencia {
+  margin-bottom: 28px;
+}
+
+.dc-eyebrow-red {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #c92535;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.dc-title-hero {
+  font-size: clamp(32px, 3.8vw, 46px);
+  font-weight: 800;
+  color: #142e34;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin: 0 0 10px;
+}
+
+.dc-subtitle-hero {
+  font-size: 16px;
+  color: #4b5563;
+  margin: 0 0 6px;
+  font-weight: 500;
+}
+
+.dc-meta-caption {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.dc-form-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 20px rgba(20, 46, 52, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.dc-form-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.dc-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .dc-row-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dc-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dc-field-group label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.01em;
+}
+
+.dc-input-modern {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: #111827;
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.dc-input-large {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  font-size: 16px;
+}
+
+.dc-textarea-modern {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #111827;
+  background: #ffffff;
+  border: 1.5px solid #3b82f6;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.dc-input-modern:focus {
+  outline: none;
+  border-color: #147d92;
+  box-shadow: 0 0 0 3px rgba(20, 125, 146, 0.12);
+  background: #fff;
+}
+
+.dc-textarea-modern:focus {
+  outline: none;
+  border-color: #147d92;
+  box-shadow: 0 0 0 3px rgba(20, 125, 146, 0.15);
+}
+
+.dc-button-wrapper {
+  margin-top: 6px;
+}
+
+.dc-btn-generate {
+  background: #c92535;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 30px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(201, 37, 53, 0.25);
+}
+
+.dc-btn-generate:hover:not(:disabled) {
+  background: #ac1f2d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(201, 37, 53, 0.35);
+}
+
+.dc-btn-generate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
 /* ===== ESTILOS ELEGANTES Y TEATRALES PARA LA GUÍA GENERADA ===== */
 .dc-guia-container {
   margin-top: 32px;
