@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Modelo principal y modelos de respaldo estables
+# Modelo principal y modelos de respaldo
 MODELOS = [
+    "gemini-3.8-flash",
     "gemini-2.0-flash",
     "gemini-1.5-flash",
-    "gemini-2.5-flash",
 ]
 
 MAX_REINTENTOS = 3
