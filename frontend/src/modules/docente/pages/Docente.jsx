@@ -505,7 +505,7 @@ function Docente() {
           </div>
         )}
       </div>
-    </div>
+    
   )
 }
 
