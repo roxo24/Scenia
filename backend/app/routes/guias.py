@@ -46,22 +46,26 @@ def post_generar_guia():
         # 1. Generar la estructura de la guía con Gemini
         guia = generar_guia(tema, objetivo, edad, duracion)
 
-        # 2. Guardar en Supabase si la conexión está activa
+        # 2. Guardar en Supabase si la conexión está activa (no bloqueante)
         if esta_conectado():
-            # Usamos los IDs '1' que acabamos de crear en las tablas base
-            guia_a_guardar = {
-                "id_curso": 1,
-                "id_docente_creador": 1,
-                "tema_didactico": tema,
-                "competencia_cneb": guia.get("competencia", "Se desenvuelve a través de su creatividad"),
-                "contenido_momento_pre": json.dumps(guia.get("momento_pre", {})),
-                "contenido_momento_durante": json.dumps(guia.get("momento_durante", {})),
-                "contenido_momento_post": json.dumps(guia.get("momento_post", {})),
-                "estado": "PUBLISHED"
-            }
-            
-            resultado_db = guardar_guia(guia_a_guardar)
-            logger.info("Guía pedagógica guardada en Supabase con éxito: %s", resultado_db)
+            try:
+                competencia = (
+                    guia.get("competencia")
+                    or "Se comunica oralmente en su lengua materna / Convive y participa democráticamente"
+                )
+                guia_a_guardar = {
+                    "id_curso": 1,
+                    "id_docente_creador": 1,
+                    "tema_didactico": tema,
+                    "competencia_cneb": str(competencia),
+                    "contenido": json.dumps(guia),
+                    "estado": "PUBLISHED",
+                }
+                
+                resultado_db = guardar_guia(guia_a_guardar)
+                logger.info("Guía pedagógica guardada en Supabase con éxito: %s", resultado_db)
+            except Exception as db_err:
+                logger.warning("Error al guardar en Supabase (no crítico): %s", db_err)
 
         return jsonify({"ok": True, "guia": guia})
 
