@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react"
+import { generarGuia } from "../../services/guias"
 
 type Page = "home" | "billboard" | "experiences" | "course" | "play" | "kit"
 type SectionKey = "com-3b" | "com-3a" | "dp-2a"
@@ -560,7 +561,7 @@ function Sidebar({
       label: "Inicio",
       icon: "home",
       page: "home",
-      active: ["home", "course", "kit"],
+      active: ["home", "course"],
     },
     {
       label: "Cartelera escolar",
@@ -573,6 +574,12 @@ function Sidebar({
       icon: "sparkles",
       page: "experiences",
       active: ["experiences"],
+    },
+    {
+      label: "Crear guía con IA",
+      icon: "wand",
+      page: "kit",
+      active: ["kit"],
     },
   ]
   return (
@@ -2003,8 +2010,19 @@ function Kit({
   navigate: (page: Page) => void
   notify: (message: string) => void
 }) {
+  const currentSection = sections[sectionKey] || sections["com-3b"]
   const [active, setActive] = useState(0)
   const [editing, setEditing] = useState(false)
+  const [cargando, setCargando] = useState(false)
+  const [mostrarConfig, setMostrarConfig] = useState(false)
+  const [tema, setTema] = useState(currentSection.topic || play?.theme || "Convivencia escolar")
+  const [objetivo, setObjetivo] = useState(
+    "Promover la empatía, la escucha activa y la resolución de conflictos a través de la dramatización escénica"
+  )
+  const [edad, setEdad] = useState(14)
+  const [duracion, setDuracion] = useState(45)
+  const [guiaGenerada, setGuiaGenerada] = useState<any>(null)
+
   const [content, setContent] = useState([
     {
       title: "Antes de la función",
@@ -2012,15 +2030,15 @@ function Kit({
       items: [
         [
           "Activación de conocimientos",
-          "Mapa de voces: el grupo identifica situaciones en las que escuchar cambió un desacuerdo.",
+          "Mapa de voces: el grupo identifica situaciones cotidianas en las que escuchar al otro transformó un conflicto escolar.",
         ],
         [
           "Taller introductorio",
-          "En parejas, ensayan una misma frase con diferentes intenciones y conversan sobre cómo cambia el mensaje.",
+          "En parejas, ensayan una misma frase con diferentes intenciones y gestos, conversando sobre el impacto del lenguaje no verbal.",
         ],
         [
           "Preguntas para conectar",
-          "¿Qué necesitamos para sentir que nuestra voz es tomada en cuenta?",
+          "¿Qué condiciones necesitamos en nuestro salón para sentir que nuestra voz es tomada en cuenta?",
         ],
       ],
     },
@@ -2029,12 +2047,16 @@ function Kit({
       subtitle: "Observar con intención",
       items: [
         [
-          "Focos de observación",
-          "Registra cómo los personajes expresan acuerdos o desacuerdos mediante su voz, sus pausas y su cuerpo.",
+          "Focos de observación escénica",
+          "Registrar cómo los personajes expresan acuerdos o tensiones mediante su volumen de voz, pausas y lenguaje corporal.",
         ],
         [
-          "Conexión con el aprendizaje",
-          "Observa recursos de comunicación sin asumir escenas específicas no incluidas en los materiales de la obra.",
+          "Estructura escénica en aula",
+          "• Escena 1 (10 min): El choque de posturas en el patio.\n• Escena 2 (20 min): La escucha como punto de quiebre.\n• Escena 3 (15 min): El acuerdo comunitario.",
+        ],
+        [
+          "Recursos expresivos a identificar",
+          "Uso del espacio compartido, cambios de ritmo escénico y miradas entre los protagonistas.",
         ],
       ],
     },
@@ -2043,20 +2065,132 @@ function Kit({
       subtitle: "Reflexionar, expresar y evidenciar",
       items: [
         [
-          "Preguntas de reflexión",
-          "¿Qué idea de la obra dialoga con la convivencia de nuestro grupo?",
+          "Preguntas para diálogo y debate",
+          "• ¿Qué decisión de los personajes resonó más con la convivencia en tu salón?\n• ¿Qué hubieras hecho diferente en su lugar?",
         ],
         [
-          "Actividad de expresión",
-          "Crea una breve escena que proponga una manera distinta de resolver un conflicto cotidiano.",
+          "Actividad de expresión teatral",
+          "Crea una breve escena en grupos de tres que proponga una salida pacífica y constructiva a un malentendido escolar.",
         ],
         [
-          "Evidencia y evaluación",
-          "Reflexión oral o escrita. Criterios: claridad, escucha, relación con el tema y propuesta personal.",
+          "Recomendaciones docentes y evaluación",
+          "Propiciar un espacio de confianza sin juzgar las emociones iniciales. Evaluar claridad, empatía evidenciada y propuesta personal.",
         ],
       ],
     },
   ])
+
+  // Llamada Real a la IA (Gemini vía backend Flask)
+  const generarConIA = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setCargando(true)
+    notify("Conectando con Gemini para diseñar tu propuesta teatral...")
+
+    try {
+      const data = await generarGuia({
+        tema: tema.trim() || currentSection.topic,
+        objetivo: objetivo.trim(),
+        edad: Number(edad) || 14,
+        duracion: Number(duracion) || 45,
+        obra_id: play?.id || 1,
+      })
+
+      const g = data.guia || {}
+      setGuiaGenerada(g)
+
+      // Transformar la respuesta de Gemini en los 3 Momentos Pedagógicos
+      const personajesStr =
+        g.personajes && g.personajes.length > 0
+          ? g.personajes.map((p: any) => `${p.nombre}: ${p.descripcion}`).join(" · ")
+          : "Elenco escolar y roles de representación"
+
+      const escenasStr =
+        g.escenas && g.escenas.length > 0
+          ? g.escenas
+              .map((sc: any) => `• ${sc.nombre} (${sc.duracion_minutos || 10} min): ${sc.instrucciones}`)
+              .join("\n")
+          : "Dramatización y trabajo corporal en equipos"
+
+      const materialesStr =
+        g.materiales && g.materiales.length > 0
+          ? g.materiales.join(", ")
+          : "Elementos del aula, sillas y espacio libre"
+
+      const preguntasStr =
+        g.preguntas_reflexion && g.preguntas_reflexion.length > 0
+          ? g.preguntas_reflexion.map((p: string) => `• ${p}`).join("\n")
+          : "¿Qué situación de la obra te hizo pensar en tu propia convivencia?"
+
+      const nuevoContenido = [
+        {
+          title: "Antes de la función",
+          subtitle: "Activar saberes y preparar la mirada",
+          items: [
+            [
+              "Objetivo pedagógico y activación",
+              g.objetivo || objetivo,
+            ],
+            [
+              "Elenco y personajes a explorar",
+              personajesStr,
+            ],
+            [
+              "Preguntas detonadoras previas",
+              g.preguntas_reflexion && g.preguntas_reflexion[0]
+                ? g.preguntas_reflexion[0]
+                : "¿Qué actitudes dificultan la convivencia y cómo podemos cambiarlas?",
+            ],
+          ],
+        },
+        {
+          title: "Durante la experiencia",
+          subtitle: "Observar con intención",
+          items: [
+            [
+              "Focos de observación escénica",
+              "Observar la transformación de posturas corporales, la escucha activa y la resolución pacífica de tensiones.",
+            ],
+            [
+              "Estructura escénica paso a paso",
+              escenasStr,
+            ],
+            [
+              "Materiales y recursos de aula",
+              materialesStr,
+            ],
+          ],
+        },
+        {
+          title: "Después de la función",
+          subtitle: "Reflexionar, expresar y evidenciar",
+          items: [
+            [
+              "Preguntas de diálogo y debate",
+              preguntasStr,
+            ],
+            [
+              "Actividad de expresión teatral",
+              "Los estudiantes representan en tríos una escena alternativa donde aplican una solución pacífica aprendida.",
+            ],
+            [
+              "Recomendaciones docentes y evaluación",
+              g.recomendaciones_docente ||
+                "Guiar la reflexión hacia compromisos prácticos de convivencia. Criterios: empatía, claridad y escucha activa.",
+            ],
+          ],
+        },
+      ]
+
+      setContent(nuevoContenido)
+      notify("¡Guía pedagógica generada exitosamente con Gemini IA!")
+      setMostrarConfig(false)
+    } catch (err: any) {
+      notify("Se utilizó la propuesta pedagógica precargada: " + (err.message || ""))
+    } finally {
+      setCargando(false)
+    }
+  }
+
   const updateItem = (itemIndex: number, value: string) =>
     setContent((current) =>
       current.map((moment, momentIndex) =>
@@ -2064,38 +2198,147 @@ function Kit({
           ? {
               ...moment,
               items: moment.items.map((item, index) =>
-                index === itemIndex ? [item[0], value] : item,
+                index === itemIndex ? [item[0], value] : item
               ),
             }
-          : moment,
-      ),
+          : moment
+      )
     )
-  const regenerate = () => notify("Sección regenerada sin modificar las demás")
+
+  const regenerate = () => {
+    generarConIA()
+  }
+
   return (
     <>
       <button className="back-link" onClick={() => navigate("course")}>
         ← Volver al curso
       </button>
+
       <PageIntro
         eyebrow="Kit pedagógico con IA"
-        title={play.title}
-        description={`${sections[sectionKey].course} · ${sections[sectionKey].shortGrade} · Tema: ${sections[sectionKey].topic}`}
+        title={guiaGenerada?.titulo || play?.title || "Propuesta Escénica con IA"}
+        description={`${currentSection.course} · ${currentSection.shortGrade} · Tema: ${tema}`}
         action={
-          <span className="status-badge">
-            <Icon name="sparkles" size={14} /> Borrador guardado
-          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              icon="wand"
+              onClick={() => setMostrarConfig(!mostrarConfig)}
+            >
+              {mostrarConfig ? "Ocultar parámetros" : "Ajustar parámetros IA"}
+            </Button>
+            <span className="status-badge">
+              <Icon name="sparkles" size={14} /> {cargando ? "Generando..." : "Borrador activo"}
+            </span>
+          </div>
         }
       />
+
+      {/* Panel de Ajustes y Generación con IA */}
+      {mostrarConfig && (
+        <form
+          onSubmit={generarConIA}
+          className="card mb-6 p-5 border-2 border-line bg-surface"
+          style={{ borderColor: "#c8c2e9" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <span className="eyebrow">CONFIGURACIÓN DEL ASISTENTE PEDAGÓGICO</span>
+              <h3 className="text-lg font-bold text-ink mt-1">Generar nueva guía con Gemini IA</h3>
+            </div>
+            <button
+              type="button"
+              className="text-xs text-muted font-bold"
+              onClick={() => setMostrarConfig(false)}
+            >
+              Cerrar ✕
+            </button>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="label">Tema o conflicto escolar:</label>
+              <Input
+                value={tema}
+                onChange={(e) => setTema(e.target.value)}
+                placeholder="Ej: Convivencia escolar, Empatía en el aula, Comunicación no violenta"
+                required
+              />
+            </div>
+            <div>
+              <label className="label">Objetivo pedagógico:</label>
+              <Input
+                value={objetivo}
+                onChange={(e) => setObjetivo(e.target.value)}
+                placeholder="¿Qué deseas que los estudiantes reflexionen o aprendan?"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 mt-4">
+            <div>
+              <label className="label">Edad sugerida (años):</label>
+              <Input
+                type="number"
+                min={6}
+                max={18}
+                value={edad}
+                onChange={(e) => setEdad(Number(e.target.value))}
+                required
+              />
+            </div>
+            <div>
+              <label className="label">Duración de la sesión (minutos):</label>
+              <Input
+                type="number"
+                min={15}
+                max={120}
+                value={duracion}
+                onChange={(e) => setDuracion(Number(e.target.value))}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-5">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setMostrarConfig(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={cargando} icon="wand">
+              {cargando ? "Generando propuesta con Gemini..." : "Generar guía con IA ✨"}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* Banner Informativo */}
       <div className="ai-note">
         <Icon name="wand" />
-        <div>
-          <strong>Borrador personalizado</strong>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <strong>Propuesta pedagógica personalizada</strong>
+            <button
+              type="button"
+              className="text-link"
+              onClick={() => generarConIA()}
+              disabled={cargando}
+            >
+              {cargando ? "Generando..." : "↻ Regenerar todo con Gemini"}
+            </button>
+          </div>
           <p>
-            Creado con la información disponible de la obra, el grado, el tema y
-            los intereses del grupo. Revisa el contenido antes de asignarlo.
+            Generada con Google Gemini considerando el contexto del grupo, la edad ({edad} años) y el tema ({tema}). Todo el contenido es 100% editable en tiempo real.
           </p>
         </div>
       </div>
+
+      {/* Grid de 3 Momentos Pedagógicos */}
       <div className="mt-6 grid gap-6 xl:grid-cols-kit">
         <aside className="moment-nav">
           {content.map((moment, index) => (
@@ -2115,27 +2358,33 @@ function Kit({
             </button>
           ))}
         </aside>
+
         <section className="card overflow-hidden">
           <div className="flex flex-col gap-4 border-b border-line p-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="eyebrow">Momento {active + 1} de 3</div>
-              <h2 className="mt-1 text-xl font-bold">
-                {content[active].title}
-              </h2>
+              <h2 className="mt-1 text-xl font-bold">{content[active].title}</h2>
+              <p className="text-xs text-muted mt-1">{content[active].subtitle}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="ghost" icon="refresh" onClick={regenerate}>
-                Regenerar sección
+              <Button
+                variant="ghost"
+                icon="refresh"
+                onClick={regenerate}
+                disabled={cargando}
+              >
+                {cargando ? "Consultando IA..." : "Regenerar sección con IA"}
               </Button>
               <Button
                 variant="secondary"
                 icon="edit"
                 onClick={() => setEditing(!editing)}
               >
-                {editing ? "Terminar edición" : "Editar"}
+                {editing ? "Terminar edición" : "Editar textos"}
               </Button>
             </div>
           </div>
+
           <div className="p-5 md:p-6 space-y-5">
             {content[active].items.map((item, index) => (
               <div className="kit-item" key={item[0]}>
@@ -2148,10 +2397,11 @@ function Kit({
                     <Textarea
                       aria-label={`Editar ${item[0]}`}
                       value={item[1]}
+                      rows={item[1].includes("\n") ? 4 : 2}
                       onChange={(e) => updateItem(index, e.target.value)}
                     />
                   ) : (
-                    <p className="mt-2 text-sm leading-6 text-muted">
+                    <p className="mt-2 text-sm leading-6 text-muted" style={{ whiteSpace: "pre-line" }}>
                       {item[1]}
                     </p>
                   )}
@@ -2159,18 +2409,29 @@ function Kit({
               </div>
             ))}
           </div>
-          <div className="flex flex-col-reverse gap-3 border-t border-line p-5 sm:flex-row sm:justify-end">
+
+          <div className="flex flex-col-reverse gap-3 border-t border-line p-5 sm:flex-row sm:justify-between">
             <Button
               variant="secondary"
-              onClick={() => notify("Cambios guardados")}
+              onClick={() => window.print()}
             >
-              Guardar cambios
+              📄 Imprimir / Descargar PDF
             </Button>
-            <Button
-              onClick={() => notify("Guía asignada a Comunicación · 3.º B")}
-            >
-              Revisar y asignar al grupo
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => notify("Cambios guardados en tu sesión")}
+              >
+                Guardar cambios
+              </Button>
+              <Button
+                onClick={() =>
+                  notify(`Guía pedagógica asignada exitosamente a ${currentSection.course} · ${currentSection.shortGrade}`)
+                }
+              >
+                Revisar y asignar al grupo
+              </Button>
+            </div>
           </div>
         </section>
       </div>
